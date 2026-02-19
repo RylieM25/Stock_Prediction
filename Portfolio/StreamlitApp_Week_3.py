@@ -101,7 +101,7 @@ def call_model_api(input_df):
     )
 
     try:
-        raw_pred = predictor.predict(input_df)
+        raw_pred = predictor.predict(input_df.values.astype("float32"))
         pred_val = pd.DataFrame(raw_pred).values[-1][0]
         return round(float(pred_val), 4), 200
     except Exception as e:
@@ -137,20 +137,22 @@ with st.form("pred_form"):
             )
     
     submitted = st.form_submit_button("Run Prediction")
+# Prepare data
+base_df = df_features
 
-if submitted:
+# Build row that matches model training features exactly
+data_dict = {col: user_inputs.get(col, 0) for col in base_df.columns}
+new_row = pd.DataFrame([data_dict])
 
-    data_row = [user_inputs[k] for k in MODEL_INFO["keys"]]
-    # Prepare data
-    base_df = df_features
-    input_df = pd.concat([base_df, pd.DataFrame([data_row], columns=base_df.columns)])
-    
-    res, status = call_model_api(input_df)
-    if status == 200:
-        st.metric("Prediction Result", res)
-        display_explanation(input_df,session, aws_bucket)
-    else:
-        st.error(res)
+# Run prediction ONLY on the new row
+res, status = call_model_api(new_row)
+
+if status == 200:
+    st.metric("Prediction Result", res)
+    display_explanation(new_row, session, aws_bucket)
+else:
+    st.error(res)
+
 
 
 
