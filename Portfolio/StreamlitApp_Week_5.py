@@ -24,12 +24,19 @@ import shap
 
 # Setup & Path Configuration
 warnings.simplefilter("ignore")
+# Setup & Path Configuration
 
-# Fix path for Streamlit Cloud (ensure 'src' is findable)
+
+import os
+import sys
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_dir, '..'))
-if project_root not in sys.path:
-    sys.path.append(project_root)
+hw3_path = os.path.join(project_root, "HW3")
+
+for p in [project_root, hw3_path]:
+    if p not in sys.path:
+        sys.path.append(p)
 
 from src.feature_utils import get_bitcoin_historical_prices
 
@@ -176,6 +183,7 @@ if submitted:
         display_explanation(input_df,session, aws_bucket)
     else:
         st.error(res)
+
 
 
 
