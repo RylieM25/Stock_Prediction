@@ -30,13 +30,13 @@ warnings.simplefilter("ignore")
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, '..'))
-hw3_path = os.path.join(project_root, "HW3")
+import sys
+from pathlib import Path
 
-for p in [project_root, hw3_path]:
-    if p not in sys.path:
-        sys.path.append(p)
+current_file = Path(__file__).resolve()
+project_root = current_file.parents[1]   # repo root (folder that contains Portfolio/ and src/)
+
+sys.path.insert(0, str(project_root))
 
 from src.feature_utils import get_bitcoin_historical_prices
 
@@ -183,6 +183,7 @@ if submitted:
         display_explanation(input_df,session, aws_bucket)
     else:
         st.error(res)
+
 
 
 
