@@ -86,65 +86,44 @@ def get_bitcoin_historical_prices(days = 60):
     df = df[['Date', 'Close Price (USD)']].set_index('Date')
     return df
 
-def convert_input_pca_regression(request_body, request_content_type):
+def convert_input_pca_regression(request_body, request_content_type, model_choice='kernelpca2'):
     print(f"Receiving data of type: {request_content_type}")
     
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(current_dir, '..'))
     file_path = os.path.join(project_root, 'Portfolio/SP500Data.csv')
 
-    dataset = pd.read_csv(file_path,index_col=0)
+    dataset = pd.read_csv(file_path, index_col=0)
 
-    target = 'NVDA'
+    target = 'MSFT'
 
-    option = 2
+    X = FeatureEngineer(windows=[5,10,15,20,30,45,60]).transform(dataset[[target]])
 
-    if option == 2:
+    request_json = json.loads(request_body)
 
-        X = FeatureEngineer(windows=[5,10,15,20,30,45,60]).transform(dataset[[target]])
-        
+    if model_choice == 'kernelpca2':
         techIndicator_1 = 'RSI_15'
-        value_1 = json.loads(request_body)[techIndicator_1]
-        
         techIndicator_2 = 'MOM_15'
-        value_2 = json.loads(request_body)[techIndicator_2]
-    
-        distances = np.sqrt(
-            (X[techIndicator_1] - value_1)**2 + 
-            (X[techIndicator_2] - value_2)**2
-        )
-        
-        closest_index = distances.idxmin()
-        closest_row = X.loc[[closest_index]].copy()
-    
-        closest_row[techIndicator_1] = value_1
-        closest_row[techIndicator_2] = value_2
 
-        return closest_row
-     else:
+    elif model_choice == 'next_best':
+        techIndicator_1 = 'RSI_30'
+        techIndicator_2 = 'MOM_30'
 
-        return_period = 5
+    else:
+        raise ValueError("model_choice must be 'kernelpca2' or 'next_best'")
 
-        SP500_1 = 'IBM_CR_Cum'
-        IBM_CR_Cum = json.loads(request_body)[SP500_1]
-        SP500_2 = 'NVDA_CR_Cum'
-        NVDA_CR_Cum = json.loads(request_body)[SP500_2]
+    value_1 = request_json[techIndicator_1]
+    value_2 = request_json[techIndicator_2]
 
-        X = np.log(dataset.drop([target],axis=1)).diff(return_period)
-        X = np.exp(X).cumsum()
-        X.columns = [name + "_CR_Cum" for name in X.columns]
-        
-        # Calculate the distance
-        distances = np.sqrt(
-            (X[SP500_1] - IBM_CR_Cum)**2 + 
-            (X[SP500_2] - NVDA_CR_Cum)**2
-        )
-        
-        closest_index = distances.idxmin()
-        closest_row = X.loc[[closest_index]]
-    
-        closest_row[SP500_1] = IBM_CR_Cum
-        closest_row[SP500_2] = NVDA_CR_Cum
-    
-        return closest_row
-    
+    distances = np.sqrt(
+        (X[techIndicator_1] - value_1)**2 +
+        (X[techIndicator_2] - value_2)**2
+    )
+
+    closest_index = distances.idxmin()
+    closest_row = X.loc[[closest_index]].copy()
+
+    closest_row[techIndicator_1] = value_1
+    closest_row[techIndicator_2] = value_2
+
+    return closest_row
