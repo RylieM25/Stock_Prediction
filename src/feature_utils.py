@@ -120,8 +120,8 @@ def convert_input_pca_regression(request_body, request_content_type):
         closest_row[techIndicator_1] = value_1
         closest_row[techIndicator_2] = value_2
 
-    return closest_row
-        else:
+        return closest_row
+     else:
 
         return_period = 5
 
