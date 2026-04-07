@@ -101,8 +101,6 @@ def convert_input_pca_regression(request_body, request_content_type):
 
     if option == 2:
 
-       if option == 2:
-
     X = FeatureEngineer(windows=[5,10,15,20,30,45,60]).transform(dataset[[target]])
     
     techIndicator_1 = 'RSI_15'
