@@ -99,7 +99,7 @@ def convert_input_pca_regression(request_body, request_content_type):
 
     option = 2
 
-        if option == 2:
+    if option == 2:
 
         X = FeatureEngineer(windows=[5,10,15,20,30,45,60]).transform(dataset[[target]])
         
@@ -121,7 +121,7 @@ def convert_input_pca_regression(request_body, request_content_type):
         closest_row[techIndicator_2] = value_2
 
     return closest_row
-    else:
+        else:
 
         return_period = 5
 
