@@ -101,24 +101,24 @@ def convert_input_pca_regression(request_body, request_content_type):
 
         if option == 2:
 
-    X = FeatureEngineer(windows=[5,10,15,20,30,45,60]).transform(dataset[[target]])
+        X = FeatureEngineer(windows=[5,10,15,20,30,45,60]).transform(dataset[[target]])
+        
+        techIndicator_1 = 'RSI_15'
+        value_1 = json.loads(request_body)[techIndicator_1]
+        
+        techIndicator_2 = 'MOM_15'
+        value_2 = json.loads(request_body)[techIndicator_2]
     
-    techIndicator_1 = 'RSI_15'
-    value_1 = json.loads(request_body)[techIndicator_1]
+        distances = np.sqrt(
+            (X[techIndicator_1] - value_1)**2 + 
+            (X[techIndicator_2] - value_2)**2
+        )
+        
+        closest_index = distances.idxmin()
+        closest_row = X.loc[[closest_index]].copy()
     
-    techIndicator_2 = 'MOM_15'
-    value_2 = json.loads(request_body)[techIndicator_2]
-
-    distances = np.sqrt(
-        (X[techIndicator_1] - value_1)**2 + 
-        (X[techIndicator_2] - value_2)**2
-    )
-    
-    closest_index = distances.idxmin()
-    closest_row = X.loc[[closest_index]].copy()
-
-    closest_row[techIndicator_1] = value_1
-    closest_row[techIndicator_2] = value_2
+        closest_row[techIndicator_1] = value_1
+        closest_row[techIndicator_2] = value_2
 
     return closest_row
     else:
