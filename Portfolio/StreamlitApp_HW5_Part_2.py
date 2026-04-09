@@ -118,18 +118,23 @@ try:
     input_df_transformed = pd.DataFrame(input_df_transformed, columns=feature_names)
 except Exception:
     pass
-
 st.write("SHAP input shape:", input_df_transformed.shape)
 
 shap_values = explainer(input_df_transformed)
 
-    st.subheader("🔍 Decision Transparency (SHAP)")
-    fig, ax = plt.subplots(figsize=(10, 4))
-    shap.plots.waterfall(shap_values[0, :, 0])
-    st.pyplot(fig)
-    # top feature   
-    top_feature = pd.Series(shap_values[0, :, 0].values, index=shap_values[0, :, 0].feature_names).abs().idxmax()
-    st.info(f"**Business Insight:** The most influential factor in this decision was **{top_feature}**.")
+st.subheader("🔍 Decision Transparency (SHAP)")
+
+fig, ax = plt.subplots(figsize=(10, 4))
+shap.plots.waterfall(shap_values[0, :, 0])
+st.pyplot(fig)
+
+# top feature
+top_feature = pd.Series(
+    shap_values[0, :, 0].values,
+    index=shap_values[0, :, 0].feature_names
+).abs().idxmax()
+
+st.info(f"**Business Insight:** The most influential factor in this decision was **{top_feature}**.")
 
 
 # Streamlit UI
