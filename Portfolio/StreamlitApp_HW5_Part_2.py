@@ -107,12 +107,7 @@ def call_model_api(input_df):
         return f"Error: {str(e)}", 500
 
 # Local Explainability
-def display_explanation(input_df, session, aws_bucket):
-    explainer_name = MODEL_INFO["explainer"]
-    explainer = load_shap_explainer(session, aws_bucket, posixpath.join('explainer', explainer_name),os.path.join(tempfile.gettempdir(), explainer_name))
-
-    raw_json_input = json.dumps(input_df)
-    input_df = convert_input_pca_regression(raw_json_input, 'application/json')
+input_df = convert_input_pca_regression(raw_json_input, 'application/json')
 
 # Match SHAP input to the model's final preprocessing output
 preprocessing_pipeline = best_pipeline[:-1]
