@@ -114,13 +114,19 @@ def display_explanation(input_df, session, aws_bucket):
     raw_json_input = json.dumps(input_df)
     input_df = convert_input_pca_regression(raw_json_input, 'application/json')
 
-    best_pipeline = load_pipeline(session, aws_bucket, 'sklearn-pipeline-deployment')
-    
-    preprocessing_pipeline = Pipeline(steps=best_pipeline.steps[:-1]) 
-    input_df_transformed = preprocessing_pipeline.transform(input_df) 
-    feature_names = best_pipeline[0:2].get_feature_names_out() 
-    input_df_transformed = pd.DataFrame(input_df_transformed, columns=feature_names) 
-    shap_values = explainer(input_df_transformed) 
+# Match SHAP input to the model's final preprocessing output
+preprocessing_pipeline = best_pipeline[:-1]
+input_df_transformed = preprocessing_pipeline.transform(input_df)
+
+try:
+    feature_names = preprocessing_pipeline.get_feature_names_out()
+    input_df_transformed = pd.DataFrame(input_df_transformed, columns=feature_names)
+except Exception:
+    pass
+
+st.write("SHAP input shape:", input_df_transformed.shape)
+
+shap_values = explainer(input_df_transformed)
 
     st.subheader("🔍 Decision Transparency (SHAP)")
     fig, ax = plt.subplots(figsize=(10, 4))
