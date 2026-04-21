@@ -61,15 +61,21 @@ df_features = extract_features()
 
 MODEL_INFO = {
     "endpoint": aws_endpoint,
-    "explainer": 'explainer_sentiment.shap',
-    "pipeline": 'finalized_sentiment_model.tar.gz',
-
+    "explainer": "explainer_sentiment.shap",
+    "pipeline": "finalized_sentiment_model.tar.gz",
     "keys": [
-        'AMZN','GOOG','ADBE','MSFT','TSLA',
-        'AMZN_lag1','GOOG_lag1','ADBE_lag1','MSFT_lag1','TSLA_lag1',
-        'sentiment_textblob'
+        "AMZN",
+        "GOOG",
+        "ADBE",
+        "MSFT",
+        "TSLA",
+        "AMZN_lag1",
+        "GOOG_lag1",
+        "ADBE_lag1",
+        "MSFT_lag1",
+        "TSLA_lag1",
+        "sentiment_textblob"
     ],
-
     "inputs": [
         {
             "name": k,
@@ -80,29 +86,20 @@ MODEL_INFO = {
             "step": 0.01
         }
         for k in [
-            'AMZN','GOOG','ADBE','MSFT','TSLA',
-            'AMZN_lag1','GOOG_lag1','ADBE_lag1','MSFT_lag1','TSLA_lag1',
-            'sentiment_textblob'
+            "AMZN",
+            "GOOG",
+            "ADBE",
+            "MSFT",
+            "TSLA",
+            "AMZN_lag1",
+            "GOOG_lag1",
+            "ADBE_lag1",
+            "MSFT_lag1",
+            "TSLA_lag1",
+            "sentiment_textblob"
         ]
     ]
 }
-    "inputs": [
-        {
-            "name": k,
-            "type": "number",
-            "min": -5.0,
-            "max": 5.0,
-            "default": 0.0,
-            "step": 0.01
-        }
-        for k in [
-            'AMZN','GOOG','ADBE','MSFT','TSLA',
-            'AMZN_lag1','GOOG_lag1','ADBE_lag1','MSFT_lag1','TSLA_lag1',
-            'sentiment_textblob'
-        ]
-    ]
-}
-
 def load_pipeline(_session, bucket, key):
     s3_client = _session.client('s3')
     filename=MODEL_INFO["pipeline"]
