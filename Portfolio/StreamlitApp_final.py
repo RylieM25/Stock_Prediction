@@ -124,10 +124,14 @@ def display_explanation(input_df, session, aws_bucket):
     explainer = load_shap_explainer(session, aws_bucket, posixpath.join('explainer', explainer_name),os.path.join(tempfile.gettempdir(), explainer_name))
     
     best_pipeline = load_pipeline(session, aws_bucket, 'sklearn-pipeline-deployment')
-    preprocessing_pipeline = Pipeline(steps=best_pipeline.steps[:-2])
-    input_df_transformed = preprocessing_pipeline.transform(input_df)
-    feature_names = best_pipeline[:-2].get_feature_names_out()
-    input_df_transformed = pd.DataFrame(input_df_transformed, columns=feature_names)
+    transform_pipeline = best_pipeline[:-1]
+    input_df_transformed = transform_pipeline.transform(input_df)
+
+    feature_names_after_preprocessing = best_pipeline.named_steps['preprocessor'].get_feature_names_out()
+    selected_mask = best_pipeline.named_steps['feature_selection'].get_support()
+    selected_features = feature_names_after_preprocessing[selected_mask]
+
+input_df_transformed = pd.DataFrame(input_df_transformed, columns=selected_features)
     shap_values = explainer(input_df_transformed)
     
     st.subheader("🔍 Decision Transparency (SHAP)")
