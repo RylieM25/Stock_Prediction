@@ -34,7 +34,6 @@ project_root = os.path.abspath(os.path.join(current_dir, '..'))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from src.feature_utils import extract_features
 
 # Access the secrets
 aws_id = st.secrets["aws_credentials"]["AWS_ACCESS_KEY_ID"]
@@ -57,7 +56,6 @@ session = get_session(aws_id, aws_secret, aws_token)
 sm_session = sagemaker.Session(boto_session=session)
 
 # Data & Model Configuration
-df_features = extract_features()
 
 MODEL_INFO = {
         "endpoint": aws_endpoint,
@@ -121,27 +119,45 @@ def call_model_api(input_df):
 # Local Explainability
 def display_explanation(input_df, session, aws_bucket):
     explainer_name = MODEL_INFO["explainer"]
-    explainer = load_shap_explainer(session, aws_bucket, posixpath.join('explainer', explainer_name),os.path.join(tempfile.gettempdir(), explainer_name))
-    
+    explainer = load_shap_explainer(
+        session,
+        aws_bucket,
+        posixpath.join('explainer', explainer_name),
+        os.path.join(tempfile.gettempdir(), explainer_name)
+    )
+
     best_pipeline = load_pipeline(session, aws_bucket, 'sklearn-pipeline-deployment')
+
+    # Use all preprocessing steps except final model
     transform_pipeline = best_pipeline[:-1]
     input_df_transformed = transform_pipeline.transform(input_df)
 
+    # Recover selected feature names
     feature_names_after_preprocessing = best_pipeline.named_steps['preprocessor'].get_feature_names_out()
     selected_mask = best_pipeline.named_steps['feature_selection'].get_support()
     selected_features = feature_names_after_preprocessing[selected_mask]
 
-input_df_transformed = pd.DataFrame(input_df_transformed, columns=selected_features)
+    input_df_transformed = pd.DataFrame(input_df_transformed, columns=selected_features)
+
     shap_values = explainer(input_df_transformed)
-    
+
     st.subheader("🔍 Decision Transparency (SHAP)")
     fig, ax = plt.subplots(figsize=(10, 4))
-    #shap.plots.waterfall(shap_values[0], max_display=10)
-    shap.plots.waterfall(shap_values[0, :, 0])
+
+    if len(shap_values.values.shape) == 3:
+        shap_explanation = shap_values[0, :, 0]
+    else:
+        shap_explanation = shap_values[0]
+
+    shap.plots.waterfall(shap_explanation, max_display=10, show=False)
     st.pyplot(fig)
-    # top feature 
-    # top_feature = pd.Series(shap_values[0].values, index=shap_values[0].feature_names).abs().idxmax()
-    top_feature = pd.Series(shap_values[0, :, 0].values, index=shap_values[0, :, 0].feature_names).abs().idxmax()
+    plt.close(fig)
+
+    top_feature = pd.Series(
+        np.abs(shap_explanation.values),
+        index=shap_explanation.feature_names
+    ).idxmax()
+
     st.info(f"**Business Insight:** The most influential factor in this decision was **{top_feature}**.")
 
 
