@@ -73,8 +73,7 @@ MODEL_INFO = {
         "GOOG_lag1",
         "ADBE_lag1",
         "MSFT_lag1",
-        "TSLA_lag1",
-        "sentiment_textblob"
+        "TSLA_lag1",      
     ],
     "inputs": [
         {
@@ -96,7 +95,6 @@ MODEL_INFO = {
             "ADBE_lag1",
             "MSFT_lag1",
             "TSLA_lag1",
-            "sentiment_textblob"
         ]
     ]
 }
