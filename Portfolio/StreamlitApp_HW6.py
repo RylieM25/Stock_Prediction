@@ -60,11 +60,47 @@ sm_session = sagemaker.Session(boto_session=session)
 df_features = extract_features()
 
 MODEL_INFO = {
-        "endpoint": aws_endpoint,
-        "explainer": 'explainer_sentiment.shap',
-        "pipeline": 'finalized_sentiment_model.tar.gz',
-        "keys": ['ADBE','MSFT','JPM','sentiment_textblob'],
-        "inputs": [{"name": k, "type": "number", "min": -1.0, "max": 1.0, "default": 0.0, "step": 0.01} for k in ['AMZN','GOOG','ADBE','MSFT','TSLA','AMZN_lag1','GOOG_lag1,'ADBE_lag1','MSFT_lag1','TSLA_lag1','sentiment_textblob']]
+    "endpoint": aws_endpoint,
+    "explainer": 'explainer_sentiment.shap',
+    "pipeline": 'finalized_sentiment_model.tar.gz',
+
+    "keys": [
+        'AMZN','GOOG','ADBE','MSFT','TSLA',
+        'AMZN_lag1','GOOG_lag1','ADBE_lag1','MSFT_lag1','TSLA_lag1',
+        'sentiment_textblob'
+    ],
+
+    "inputs": [
+        {
+            "name": k,
+            "type": "number",
+            "min": -5.0,
+            "max": 5.0,
+            "default": 0.0,
+            "step": 0.01
+        }
+        for k in [
+            'AMZN','GOOG','ADBE','MSFT','TSLA',
+            'AMZN_lag1','GOOG_lag1','ADBE_lag1','MSFT_lag1','TSLA_lag1',
+            'sentiment_textblob'
+        ]
+    ]
+}
+    "inputs": [
+        {
+            "name": k,
+            "type": "number",
+            "min": -5.0,
+            "max": 5.0,
+            "default": 0.0,
+            "step": 0.01
+        }
+        for k in [
+            'AMZN','GOOG','ADBE','MSFT','TSLA',
+            'AMZN_lag1','GOOG_lag1','ADBE_lag1','MSFT_lag1','TSLA_lag1',
+            'sentiment_textblob'
+        ]
+    ]
 }
 
 def load_pipeline(_session, bucket, key):
